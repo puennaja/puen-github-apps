@@ -1,50 +1,39 @@
-# GOV-001A validation evidence
+# GOV-001A Go verification evidence
 
-## Offline developer checks
+## Offline checks
 
-Run from the repository root; Python 3.11+ standard library only. No dependency
-installation, credentials, environment file, GitHub access or AI API is needed:
+Executed on 2026-10-18 on Linux with the downloaded Go 1.27.2 toolchain and
+`go-githubapp` v0.48.0. A sandbox attempt initially failed because its Go build
+cache was read-only; the required commands below were rerun successfully outside
+the sandbox with a writable cache. No GitHub App credential or live API was used.
 
-```bash
-python3 -m unittest discover -s tests/unit -v
-git diff --check
-```
-
-Executed on 2026-10-18 on Linux with Python 3.14.4:
-
-| Check | Actual result |
+| Check | Result |
 | --- | --- |
-| `python3 -m unittest discover -s tests/unit -v` | **PASSED** — 37 tests |
-| `git diff --check` | **PASSED** — no whitespace errors |
+| `go test ./...` | **PASSED** — implementer unit package; CLI compiles |
+| `go test -race ./...` | **PASSED** — same suite with race detector |
+| `go vet ./...` | **PASSED** |
 | Formal independent behavior verification | **NOT RUN** — developer-owned checks only |
-| Independent technical review by Wit | **BLOCKED** — pending review |
-| Human Gate Owner authorization to proceed beyond Draft PR | **BLOCKED** — pending human decision |
+| Independent technical review by Wit | **BLOCKED** pending review |
+| Human Gate Owner decision | **BLOCKED** pending explicit authorization |
 
-`unit/test_implementer.py` uses only synthetic App/token fixtures and a recording fake
-GitHub transport. HTTP adapter tests replace the opener; no sockets reach GitHub.
-The default transport refuses network access. Tests cover:
+`internal/implementer/implementer_test.go` ports the prior Python security scenarios
+using only synthetic App/token fixtures, a recording fake API and standard-library
+HTTP transport doubles. The framework's signed App JWT path is compile-checked, not
+executed with a key. No test calls GitHub or generates credentials.
 
-- Missing and malformed configuration, duplicate/ambiguous repositories and permissions.
-- Repository allowlist and exact work-item feature-branch authorization.
-- App/installation identity, suspension and selected-repository requirements.
-- Exact installation/token permissions, narrow token repository scope and expiry on every request.
-- Denied merge/approval/settings/secrets/Ready operations and extra argument injection.
-- Workflow writes/deletes, ancestor replacement, path traversal and arbitrary commit/tree injection.
-- Allowed feature ref creation/advancement, expected-head checks and non-force writes.
-- Draft-only creation, own-PR reads/title/body edits and other-author/fork/base/state denials.
-- Non-secret audit metadata, audit unavailability, credential-free errors/logs/stdio responses.
-- Private persistent audit files, symlink refusal, stdio size limits and redirect refusal.
+Coverage includes missing/malformed configuration, duplicate repository keys,
+unapproved repositories and branches, App/installation identity, exact installation
+and per-operation token permissions, single-repository token scope, expiry, disabled network,
+redirect denial, operation and path allowlists, workflow and arbitrary commit
+denials, feature-ref construction, Draft PR creation and own-PR restrictions.
+Audit metadata, pre-auth audit failure, secret-free errors/stdio output, private
+audit file protections and bounded host input are also exercised.
 
-These fixtures assert our local request construction and policy. They do **not** prove
-GitHub will enforce installation scopes, authenticate a real bot, refuse merge or
-protected-branch writes, or permit human approval. Parent GOV-001 is not complete.
+This is application policy evidence only. Framework/GitHub behavior under real
+credentials, bot actor attribution, branch rules, permission enforcement and
+token revocation remain **NOT RUN**.
 
 ## Live evidence matrix
-
-All scenarios below remain **NOT RUN**. No App registration/installation, private-key
-generation, real token issuance, live App authentication or permission probes were
-performed. Existing operator Git/`gh` authentication was used only for authorized
-read-only preparation and feature-branch/Draft-PR delivery; it is not App-test evidence.
 
 | ID | Scenario | Status |
 | --- | --- | --- |
@@ -57,8 +46,8 @@ read-only preparation and feature-branch/Draft-PR delivery; it is not App-test e
 | ID-07 | New PR head invalidates stale review decision (future governance work) | NOT RUN |
 | ID-08 | Human Gate Owner can approve and merge only after required checks | NOT RUN |
 
-Read-only ruleset metadata was inspected separately; see
-[the architecture evidence record](../docs/architecture/implementer-boundary.md).
-Before later authorized live testing, record the exact operation, actual actor,
-repository, branch/HEAD, expected/observed outcome, non-secret evidence link,
-token custody/expiry and rollback. Never record credential values.
+Read-only ruleset metadata is recorded in the
+[architecture evidence record](../docs/architecture/implementer-boundary.md).
+Any later live testing requires a separate human decision and must record actual
+API operation, actor, repo/HEAD, expected/observed result, non-secret evidence,
+token custody/expiry and rollback without credential values.

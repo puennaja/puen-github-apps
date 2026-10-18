@@ -11,10 +11,11 @@ This repository hosts **source code and configuration templates** for GitHub App
 Governance decisions remain in [puen-engineer](https://github.com/puennaja/puen-engineer). This repository holds implementation and integration details, not new governance authority.
 
 ## Status
-**GOV-001A: offline implementation; integration not enabled.** A provider-neutral
-Implementation Agent broker, restricted operation interface and synthetic unit tests
-are implemented. No GitHub App is registered or installed by this change. Live App
-authentication, GitHub permission enforcement and the human merge gate are **NOT RUN**.
+**GOV-001A: offline Go implementation; integration not enabled.** A provider-neutral
+Implementation Agent broker, restricted operation interface and synthetic Go tests
+are implemented with `github.com/palantir/go-githubapp` as the sole directly selected
+third-party GitHub integration framework. No GitHub App is registered or installed.
+Live App authentication, GitHub permission enforcement and the human merge gate are **NOT RUN**.
 No AI API billing is authorized. GOV-001 remains incomplete under ADR-0002 until live
 evidence and human decisions exist.
 
@@ -28,16 +29,19 @@ evidence and human decisions exist.
 - [docs/decisions/0001-bootstrap.md](docs/decisions/0001-bootstrap.md) — design decision.
 - [tests/README.md](tests/README.md) — offline results and live validation gaps.
 - [GOV-001A architecture](docs/architecture/implementer-boundary.md) — implementation decisions, custody, activation and rollback.
+- [Go framework decision](docs/decisions/0002-implementer-go-githubapp.md) and [source assessment](docs/research/go-githubapp.md).
 
 ## Next steps
 1. Obtain independent technical review by Wit and explicit Human Gate Owner authorization.
 2. Keep the existing protected `master` ruleset; resolve the bootstrap author/approver identity gate through an approved human decision.
 3. Before any activation, separately authorize App registration/installation and live tests; complete the evidence record in the architecture document.
 
-Offline developer checks (Python 3.11+, no dependencies or credentials):
+Offline developer checks (Go 1.27.2 toolchain, synthetic fixtures, no credentials):
 
 ```bash
-python3 -m unittest discover -s tests/unit -v
+go test ./...
+go test -race ./...
+go vet ./...
 ```
 
 **Never store private keys, tokens, credentials, .env files or confidential production data in this public repository.**

@@ -2,15 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Trusted Implementer broker environment configuration",
   "type": "object",
-  "required": ["IMPLEMENTER_APP_ID", "IMPLEMENTER_INSTALLATION_ID", "IMPLEMENTER_REPOSITORIES", "IMPLEMENTER_PERMISSIONS", "IMPLEMENTER_PROTECTED_BRANCHES", "IMPLEMENTER_JWT_SOURCE"],
+  "required": ["IMPLEMENTER_APP_ID", "IMPLEMENTER_INSTALLATION_ID", "IMPLEMENTER_REPOSITORIES", "IMPLEMENTER_PERMISSIONS", "IMPLEMENTER_PROTECTED_BRANCHES", "IMPLEMENTER_PRIVATE_KEY_SOURCE"],
   "properties": {
     "IMPLEMENTER_APP_ID": {"type": "string", "pattern": "^[1-9][0-9]*$"},
     "IMPLEMENTER_INSTALLATION_ID": {"type": "string", "pattern": "^[1-9][0-9]*$"},
     "IMPLEMENTER_REPOSITORIES": {"type": "string", "description": "JSON map of explicit owner/repository names to positive numeric repository IDs; 1-100 entries. No duplicate names (case-insensitive) or IDs."},
     "IMPLEMENTER_PERMISSIONS": {"type": "string", "description": "JSON object exactly equal to metadata=read, contents=write, pull_requests=write. No extra permissions."},
     "IMPLEMENTER_PROTECTED_BRANCHES": {"type": "string", "description": "JSON array of protected branch names including master and main. The authorized PR base must be included."},
-    "IMPLEMENTER_JWT_SOURCE": {"type": "string", "pattern": "^(env:[A-Z][A-Z0-9_]*|secret://[A-Za-z0-9_/-]+)$"}
+    "IMPLEMENTER_PRIVATE_KEY_SOURCE": {"type": "string", "pattern": "^(env:[A-Z][A-Z0-9_]*|secret://[A-Za-z0-9_/-]+)$"}
   },
   "additionalProperties": true,
-  "$comment": "Environment values are strings; Config.from_env validates the embedded JSON and all cross-field constraints without a JSON Schema dependency. Other environment variables are ignored. Placeholder .env.example is intentionally not runnable."
+  "$comment": "Environment values are strings; ConfigFromEnv validates the embedded JSON and all cross-field constraints without a JSON Schema dependency. Other environment variables are ignored. Placeholder .env.example is intentionally not runnable."
 }

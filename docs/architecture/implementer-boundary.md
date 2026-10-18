@@ -16,23 +16,23 @@ choices for review, not a new accepted governance decision.
 Human-approved assignment + authenticated operator bridge
   -> private JSON request/response pipes (one assignment per host)
   -> ImplementerGateway: four exact operations + immutable assignment
-  -> TokenBroker: external App JWT -> single-repository installation session
-  -> fixed-origin GitHub REST transport (network disabled by default)
+  -> go-githubapp App client -> one-repository, exact-permission token
+  -> private go-githubapp token client (network disabled by default)
   -> non-secret durable local audit events
 ```
 
-Python 3.11+ with only the standard library minimizes dependency and supply-chain
-surface in a repository without an existing language/runtime. No web framework or
-provider SDK is needed for the bounded stdio protocol. Tests run with `unittest` and
-synthetic transport fixtures. POSIX host file protections are required for the included
-audit sink; offline tests were executed on Linux with Python 3.14.4.
+Go 1.27.2 and the pinned `go-githubapp` v0.48.0 framework are used. All in-house
+policy, config, audit, HTTP guard and test code uses the Go standard library. No web
+framework or provider SDK is needed for the bounded stdio protocol. POSIX host file
+protections are required for the audit sink. See the [framework capability assessment](../research/go-githubapp.md)
+and [implementation ADR](../decisions/0002-implementer-go-githubapp.md).
 
 The core authorization boundary is the gateway operation allowlist, not prompts.
 No generic HTTP, GraphQL, Git subprocess or token-export interface is offered over
 stdio. The trusted operator alone chooses configuration, transport, authorization,
 secret source and audit destination. Caller authentication, secure pipes and isolation
 must be implemented and approved by the deployment owner; they are not established
-by starting a Python object or labeling a provider. The source tree must be pinned
+by starting a Go object or labeling a provider. The source tree must be pinned
 to reviewed code and must not execute untrusted PR code inside the broker.
 
 Push constructs a tree on the observed parent, with only validated regular-file edits,
@@ -46,15 +46,19 @@ not evidence that the required human merge rules are correctly enforced.
 
 ## Credential custody and permission limits
 
-An external operator signs App JWTs or supplies them from a secure source. No signer
-or key handling is bundled. Only the isolated broker process sees JWTs and installation
-tokens. The CLI can read a JWT from its own environment; external secret-source
-callbacks are supported in the library. Agents must run in another OS security
+An external operator supplies an App PEM from a secure source. `go-githubapp` signs
+App JWTs; the private key, JWTs and installation tokens stay in the isolated broker.
+The CLI reads a PEM from an `env:...` reference; an approved embedding may resolve
+`secret://...` through its own secure source. Agents must run in another OS security
 context and receive only the operation stream. No live deployment is authorized.
 
-Tokens are requested for a single configured numeric repository ID with Metadata read,
-Contents write and Pull requests write; responses and expiry are validated before use.
-The installation itself must use selected repositories and exactly that permission set.
+The framework's unscoped `NewInstallationClient` is not used. Its App client issues a
+token request through the GitHub API for one configured numeric repository ID with
+the operation's minimum permissions. Repository reads request Metadata read;
+feature pushes use Contents write; Draft PR creation/edits use Contents read and
+Pull requests write; own-PR reads use Pull requests read. Responses and expiry are
+validated before use. The installation itself must use selected repositories and
+exactly Metadata read, Contents write and Pull requests write.
 No Workflows, Actions, Secrets or Administration permission is accepted. The broker
 does not issue agents a Git credential; commits are published via REST Git database
 endpoints. No credential is put in a URL, Git configuration, audit event or API result.
@@ -96,7 +100,7 @@ Before enabling any integration, the Human Gate Owner must approve and record:
 | Exact App ID/name, installation ID, scopes | **NOT RUN**; placeholders only; proposed exact permissions above |
 | Selected repository names and numeric IDs | **NOT RUN** for an installation; explicit allowlist mandatory |
 | Authenticated bot actor and independent reviewer/human actors | **NOT RUN** for the App; delivery account is `puennaja` |
-| JWT source/private-key owner, custody, rotation/revocation, expiry and OS isolation | **NOT RUN**; external source and approved isolated host required |
+| PEM source/private-key owner, custody, rotation/revocation, token expiry and OS isolation | **NOT RUN**; external source and approved isolated host required |
 | Live positive/negative permission tests and GitHub evidence links | **NOT RUN**; offline tests are separate evidence |
 | Audit retention, incident owner and approved rollback | **NOT RUN** for a deployment; procedure below proposed |
 | Independent technical review by Wit and Human Gate Owner authorization | **BLOCKED** pending review and explicit human decision |
@@ -133,7 +137,7 @@ expire mid-flight. Distributed concurrency, durable idempotency and atomic PR-he
 preconditions are not provided by these REST endpoints; observed head changes are
 rejected where detectable. GitHub can change after a read; server rules remain essential.
 GitHub Enterprise/proxies are unsupported in this minimum fixed-origin adapter.
-No secure memory erasure guarantee is possible for Python strings.
+No secure memory erasure guarantee is possible for Go strings or framework internals.
 
 Primary API references: [Git trees](https://docs.github.com/en/rest/git/trees),
 [Git references](https://docs.github.com/en/rest/git/refs),

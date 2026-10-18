@@ -5,7 +5,7 @@ Logical role: `Implementation Agent`, usable with Codex, Claude Code or another
 authorized provider/tool. No provider-specific SDK, AI API or billing dependency.
 Suggested App name `puen-implementer` remains unregistered and availability unverified.
 
-`implementer.gateway.ImplementerGateway.execute` exposes exactly four operations.
+`internal/implementer.Gateway.Execute` exposes exactly four operations.
 Every gateway is constructed by the trusted host with a human-approved immutable
 `Authorization`: work item, provider, tool, authorization reference, repository,
 exact `feature/<work-item>-<description>` branch and protected base. Callers cannot
@@ -31,14 +31,15 @@ the write; there are no automatic retries.
 
 ## Operator host and configuration
 
-Python 3.11+ standard library only; no framework, package installation or build step.
-Use the repository root with `PYTHONPATH=packages/github-auth:apps/implementer`.
+Go 1.27.2 is used with `go-githubapp` v0.48.0 as the only directly selected
+third-party GitHub integration framework. The in-house policy, config, audit, HTTP
+guards and tests use the Go standard library. Run from the repository root.
 Configuration lives in [config.schema.json](config.schema.json), validated at runtime
 by `Config.from_env`; [.env.example](../../.env.example) contains placeholders only.
 The application does not read `.env` files. Supply configuration only in the trusted
-broker's environment. The CLI supports an existing short-lived JWT in an environment
-variable referenced by `env:VARIABLE_NAME`. Library users can inject a secure external
-source resolving `secret://...`; no secret-manager adapter or JWT signer is bundled.
+broker's environment. The CLI reads an existing App PEM from an `env:VARIABLE_NAME`
+reference. A trusted embedding can resolve `secret://...` externally. The framework
+signs App JWTs; no separate signer, key generation or secret-manager adapter is bundled.
 
 The operator-started host uses one bounded JSON request per line on stdin/stdout:
 
@@ -48,7 +49,7 @@ The operator-started host uses one bounded JSON request per line on stdin/stdout
 
 Responses contain `{"result": ...}` or a fixed non-secret `{"error": "code"}`.
 The host accepts `--authorization-file` (operator-owned JSON with the `Authorization`
-fields) and `--audit-file` (private JSONL file). `python3 -m implementer.host --help`
+fields) and `--audit-file` (private JSONL file). `go run ./cmd/implementer -h`
 describes the arguments. Network access defaults to disabled. The `--allow-network`
 flag is solely for a separately approved operator activation; it is never part of
 the agent request schema. No host has been started against GitHub for this change.
@@ -56,7 +57,7 @@ the agent request schema. No host has been started against GitHub for this chang
 The agent must receive only private request/response pipes from an authenticated
 operator/supervisor bridge. It must not launch this host, supply its startup flags,
 read its authorization/configuration, share its OS account, or execute code in the
-credential-bearing process. Python private attributes do not provide process
+credential-bearing process. Go package privacy does not provide process
 isolation. Deployment/supervisor authentication and OS isolation are **not supplied
 or verified** by this library. Do not enable it in a shared agent environment.
 
