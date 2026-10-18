@@ -12,8 +12,9 @@ the sandbox with a writable cache. No GitHub App credential or live API was used
 | `go test ./...` | **PASSED** — implementer unit package; CLI compiles |
 | `go test -race ./...` | **PASSED** — same suite with race detector |
 | `go vet ./...` | **PASSED** |
+| GitHub Actions `Go offline checks` | **NOT RUN** for this workflow revision; PR check results must be read from GitHub after push |
 | Formal independent behavior verification | **NOT RUN** — developer-owned checks only |
-| Independent technical review by Wit | **BLOCKED** pending review |
+| Wit source/design review | **BLOCKED** for activation/merge: a `COMMENTED` checkpoint on `c02c08e7` identified isolation and governance blockers. Tests were not independently rerun; review of the next HEAD is **NOT RUN** |
 | Human Gate Owner decision | **BLOCKED** pending explicit authorization |
 
 `internal/implementer/implementer_test.go` ports the prior Python security scenarios
@@ -32,6 +33,12 @@ audit file protections and bounded host input are also exercised.
 This is application policy evidence only. Framework/GitHub behavior under real
 credentials, bot actor attribution, branch rules, permission enforcement and
 token revocation remain **NOT RUN**.
+
+The `pull_request` workflow runs the same three checks on GitHub-hosted Linux with
+the pinned Go toolchain. It receives only a read-only repository token, does not
+persist checkout credentials, and receives no App keys or installation tokens.
+Passing CI would verify this source revision independently of the developer's
+machine; it would not verify live App or GitHub permission behavior.
 
 ## Live evidence matrix
 

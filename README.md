@@ -32,7 +32,7 @@ evidence and human decisions exist.
 - [Go framework decision](docs/decisions/0002-implementer-go-githubapp.md) and [source assessment](docs/research/go-githubapp.md).
 
 ## Next steps
-1. Obtain independent technical review by Wit and explicit Human Gate Owner authorization.
+1. Obtain Wit review of the latest HEAD and explicit Human Gate Owner authorization. Wit left a source/design checkpoint on the prior Go commit; formal independent execution verification remains **NOT RUN**.
 2. Keep the existing protected `master` ruleset; resolve the bootstrap author/approver identity gate through an approved human decision.
 3. Before any activation, separately authorize App registration/installation and live tests; complete the evidence record in the architecture document.
 

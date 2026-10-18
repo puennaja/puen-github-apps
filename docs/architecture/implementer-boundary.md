@@ -103,7 +103,7 @@ Before enabling any integration, the Human Gate Owner must approve and record:
 | PEM source/private-key owner, custody, rotation/revocation, token expiry and OS isolation | **NOT RUN**; external source and approved isolated host required |
 | Live positive/negative permission tests and GitHub evidence links | **NOT RUN**; offline tests are separate evidence |
 | Audit retention, incident owner and approved rollback | **NOT RUN** for a deployment; procedure below proposed |
-| Independent technical review by Wit and Human Gate Owner authorization | **BLOCKED** pending review and explicit human decision |
+| Independent technical review by Wit and Human Gate Owner authorization | **BLOCKED** for activation/merge after Wit `COMMENTED` source/design checkpoint on `c02c08e7`; independent execution and latest-HEAD review **NOT RUN**; human decision **BLOCKED** |
 
 Read-only GitHub inspection on 2026-10-18 observed ruleset `25336376`
 (`protected-master`) active on the default branch, requiring one approving review,
@@ -130,8 +130,10 @@ as appropriate, then reconcile writes against audit/GitHub evidence. Revert sour
 a reviewed PR; never reset or push directly to protected `master`. This rollback has
 **NOT RUN** in a live environment.
 
-No CI workflow, reviewer App, AI invocation, automatic review/merge or Ready transition
-is implemented. File edits are UTF-8 regular files with bounded paths/sizes; binary
+An offline pull-request CI workflow runs Go test, race and vet without App credentials;
+its check result is separate from live enforcement evidence. No reviewer App, AI
+invocation, automatic review/merge or Ready transition is implemented. File edits
+are UTF-8 regular files with bounded paths/sizes; binary
 files, executable modes, symlinks and submodules are unsupported. A long operation can
 expire mid-flight. Distributed concurrency, durable idempotency and atomic PR-head
 preconditions are not provided by these REST endpoints; observed head changes are
