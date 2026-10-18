@@ -93,7 +93,7 @@ func fixtureSession() *fakeSession {
 func newTestService(t *testing.T, capacity int, engine Engine, session *fakeSession) (*Service, *fakeSource) {
 	t.Helper()
 	source := &fakeSource{session: session}
-	s, err := NewService(testConfig(), source, engine, capacity)
+	s, err := newServiceWithEngine(testConfig(), source, engine, capacity)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -338,7 +338,7 @@ func TestScopeAndExpiryFailClosed(t *testing.T) {
 func TestInvalidConfigAndRequestBounds(t *testing.T) {
 	c := testConfig()
 	c.WebhookSecret = ""
-	if _, err := NewService(c, &fakeSource{}, UnavailableEngine{}, 1); err == nil {
+	if _, err := NewService(c, &fakeSource{}, 1); err == nil {
 		t.Fatal("accepted missing secret")
 	}
 	c = testConfig()
@@ -359,6 +359,73 @@ func TestInvalidConfigAndRequestBounds(t *testing.T) {
 	request := httptest.NewRequest("GET", "https://api.github.com/app", nil)
 	if _, err := transport.RoundTrip(request); err == nil || called {
 		t.Fatal("network guard did not fail closed")
+	}
+}
+
+func TestListFilesPaginationBoundary(t *testing.T) {
+	for _, tc := range []struct {
+		name                 string
+		first, second        int
+		secondFails          bool
+		wantCount, wantCalls int
+		wantError            bool
+	}{
+		{"below-limit", 99, 0, false, 99, 1, false},
+		{"exact-limit", 100, 0, false, 100, 2, false},
+		{"one-over", 100, 1, false, 0, 2, true},
+		{"two-hundred", 100, 100, false, 0, 2, true},
+		{"second-page-fails", 100, 0, true, 0, 2, true},
+		{"oversize-response", 101, 0, false, 0, 1, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			calls := 0
+			session := &reviewerSession{repository: "owner/repo", expires: time.Now().Add(40 * time.Minute), now: time.Now}
+			session.api = func(_ context.Context, method, path string, _, out any) error {
+				calls++
+				if method != "GET" {
+					t.Fatalf("unexpected verb %s", method)
+				}
+				count := 0
+				switch path {
+				case "repos/owner/repo/pulls/1/files?per_page=100&page=1":
+					count = tc.first
+				case "repos/owner/repo/pulls/1/files?per_page=100&page=2":
+					if tc.secondFails {
+						return errors.New("synthetic page failure")
+					}
+					count = tc.second
+				default:
+					t.Fatalf("unexpected pagination path %s", path)
+				}
+				items := make([]map[string]string, count)
+				for i := range items {
+					items[i] = map[string]string{"filename": fmt.Sprintf("file-%03d.go", i), "patch": "@@ -0,0 +1 @@\n+x"}
+				}
+				encoded, _ := json.Marshal(items)
+				return json.Unmarshal(encoded, out)
+			}
+			files, err := session.ListFiles(context.Background(), 1)
+			if len(files) != tc.wantCount || calls != tc.wantCalls || (err != nil) != tc.wantError {
+				t.Fatalf("files=%d calls=%d err=%v", len(files), calls, err)
+			}
+		})
+	}
+}
+
+func TestProductionConstructorCannotDeclareReady(t *testing.T) {
+	f := fixtureSession()
+	s, err := NewService(testConfig(), &fakeSource{session: f}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if code := sendWebhook(s, "production", "pull_request", payload("opened", shaA, false, 17, 11), true).Code; code != 202 {
+		t.Fatalf("webhook %d", code)
+	}
+	if !s.ProcessOne(context.Background()) {
+		t.Fatal("review was not processed")
+	}
+	if len(f.reports) != 1 || f.reports[0].Status != "REVIEW_UNAVAILABLE" || f.reports[0].checkBody()["conclusion"] != "action_required" {
+		t.Fatalf("production service claimed AI readiness: %+v", f.reports)
 	}
 }
 

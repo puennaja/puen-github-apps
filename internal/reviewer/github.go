@@ -229,7 +229,7 @@ func (s *reviewerSession) ListFiles(ctx context.Context, number int) ([]DiffFile
 		var next []struct {
 			Filename string `json:"filename"`
 		}
-		if err := s.request(ctx, "GET", "/pulls/"+itoa(number)+"/files?per_page=1&page=101", nil, &next); err != nil {
+		if err := s.request(ctx, "GET", "/pulls/"+itoa(number)+"/files?per_page=100&page=2", nil, &next); err != nil {
 			return nil, err
 		}
 		if len(next) != 0 {

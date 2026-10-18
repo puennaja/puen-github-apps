@@ -10,7 +10,7 @@ Use Go and the existing pinned `github.com/palantir/go-githubapp v0.48.0` as the
 
 Use Check Runs instead of PR comments. That allows `Pull requests: read` plus `Checks: write` without PR write, and ties each outcome to a reviewed commit. A completed review with BLOCKER/MAJOR is a failing check; a complete review without those findings is a successful **advisory** check. Any unavailable/incomplete analysis uses `action_required`, never `neutral` or `success`: GitHub treats `neutral` as passing for required checks. GitHub human Approval and Merge remain solely with the Human Gate Owner.
 
-No real engine is selected. `Engine` accepts bounded inert evidence and returns structured findings; `UnavailableEngine` is the only runtime implementation, and deterministic mocks are for tests. Subscription-backed or local CLI integration requires a separate, approved assessment of terms, unattended access, isolation, identity, cost and safe invocation. It must not share the App's credentials, process, OS context or unrestricted filesystem. No paid AI API is called.
+No real engine is selected. `Engine` accepts bounded inert evidence and returns structured findings; the exported production constructor always selects `UnavailableEngine`, while the mock-engine constructor is private to package-local tests. An embedding cannot supply a readiness-capable engine without a separately reviewed code change. Subscription-backed or local CLI integration requires a separate, approved assessment of terms, unattended access, isolation, identity, cost and safe invocation. It must not share the App's credentials, process, OS context or unrestricted filesystem. No paid AI API is called.
 
 ## Dependencies and limits
 

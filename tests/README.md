@@ -66,7 +66,8 @@ acceptance/rejection through `go-githubapp`, accepted events, Draft filtering,
 repository/installation/base identity, duplicate deliveries, queue overflow and
 redelivery, stale SHA suppression, protected-base context, token scope/expiry,
 unavailable engine, BLOCKER/MAJOR/MINOR Check Run outcomes, failure retries,
-reporting failure and non-secret error/status behavior. No real key, token,
+reporting failure, 99/100/101/200-file pagination and the production constructor's
+unavailable-only result. No real key, token,
 webhook delivery or AI model is used. The CI workflow runs `go test -count=1 ./...`,
 `go test -race -count=1 ./...` and `go vet ./...` without App credentials.
 
@@ -75,7 +76,7 @@ webhook delivery or AI model is used. The CI workflow runs `go test -count=1 ./.
 | `go test ./...` | **PASSED** — synthetic reviewer and existing implementer packages |
 | `go test -race ./...` | **PASSED** — synthetic reviewer and existing implementer packages |
 | `go vet ./...` | **PASSED** |
-| `go test -cover ./internal/reviewer` | **PASSED** — 64.8% statement coverage; framework App/JWT and real GitHub transport paths are untested |
+| `go test -cover ./internal/reviewer` | **PASSED** — 69.3% statement coverage; framework App/JWT and real GitHub transport paths are untested |
 | GitHub PR CI | **NOT RUN** until feature branch push |
 | Live App actor, webhook, token permission and Check Run enforcement | **NOT RUN**; requires separate approval |
 | Real isolated AI engine and human approval/merge path | **BLOCKED** pending terms, isolation, identity and owner authorization |

@@ -47,7 +47,14 @@ type Service struct {
 	web    http.Handler
 }
 
-func NewService(c Config, source Source, engine Engine, queueCapacity int) (*Service, error) {
+// NewService is the only production constructor in GOV-003A. An engine that can
+// declare readiness requires a separate, reviewed code change and activation.
+func NewService(c Config, source Source, queueCapacity int) (*Service, error) {
+	return newServiceWithEngine(c, source, UnavailableEngine{}, queueCapacity)
+}
+
+// The mock engine seam is private to this package and its offline tests.
+func newServiceWithEngine(c Config, source Source, engine Engine, queueCapacity int) (*Service, error) {
 	if err := c.Validate(); err != nil || source == nil || engine == nil || queueCapacity < 1 || queueCapacity > 1024 {
 		return nil, errors.New("reviewer_configuration_invalid")
 	}
