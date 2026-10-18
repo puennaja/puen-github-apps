@@ -1,0 +1,14 @@
+# Local credentials and sensitive artifacts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+node_modules/
+dist/
+coverage/
+.DS_Store
