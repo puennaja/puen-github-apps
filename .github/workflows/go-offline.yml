@@ -22,6 +22,7 @@ jobs:
           go-version: '1.27.2'
           cache: false
       - name: Test
+        # Includes synthetic reviewworker process tests; no provider credentials or inference.
         run: go test -count=1 ./...
       - name: Race test
         run: go test -race -count=1 ./...

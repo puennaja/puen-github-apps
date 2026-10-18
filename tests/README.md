@@ -80,3 +80,18 @@ webhook delivery or AI model is used. The CI workflow runs `go test -count=1 ./.
 | GitHub PR CI | **NOT RUN** until feature branch push |
 | Live App actor, webhook, token permission and Check Run enforcement | **NOT RUN**; requires separate approval |
 | Real isolated AI engine and human approval/merge path | **BLOCKED** pending terms, isolation, identity and owner authorization |
+
+## GOV-003B review worker offline evidence
+
+`internal/reviewworker` tests use the Go test executable as a synthetic child process. They cover request/response schema and size limits, missing requirements, untrusted prompt-injection text, executable allowlists, clean environment, malformed/oversized output, timeout/cancellation, process termination, severity/line/evidence and stale-SHA rejection. `internal/reviewer/review_worker_test.go` checks the private bridge rejects incomplete/stale or failed engine output and that the production constructor still selects `UnavailableEngine`. No Codex/Claude model, GitHub App authentication or live Check Run runs in these tests.
+
+| GOV-003B check | Result |
+| --- | --- |
+| `go test -count=1 ./...` | **PASSED** — synthetic tests and existing packages; see local run in PR evidence |
+| `go test -race -count=1 ./...` | **PASSED** — synthetic worker and existing packages |
+| `go vet ./...` | **PASSED** |
+| GitHub PR CI | **NOT RUN** until Draft PR creation |
+| Real CLI terms, cost, auth, network/filesystem/memory isolation | **BLOCKED** pending independent verification and Human Gate Owner authorization |
+| Live GitHub actor, permissions and human merge enforcement | **NOT RUN** |
+
+Offline tests do not establish real OS/container isolation or GitHub permission enforcement. The `memory_mib` field is not enforced by the synthetic transport. Provider execution remains disabled.
