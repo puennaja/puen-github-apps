@@ -2,6 +2,12 @@
 
 **Status: unverified; do not register/install yet without separate approval.**
 
+GOV-001A implements offline validation of the Implementer column as an exact
+permission map and a single-repository token request. See the
+[authentication boundary](../../packages/github-auth/README.md) and
+[activation evidence gate](../architecture/implementer-boundary.md). Offline policy
+tests are **PASSED**; actual GitHub permission enforcement remains **NOT RUN**.
+
 | Permission | Implementer | Reviewer | Human |
 | --- | --- | --- | --- |
 | Metadata | Read | Read | GitHub account |

@@ -11,21 +11,33 @@ This repository hosts **source code and configuration templates** for GitHub App
 Governance decisions remain in [puen-engineer](https://github.com/puennaja/puen-engineer). This repository holds implementation and integration details, not new governance authority.
 
 ## Status
-**Bootstrap / design only.** No GitHub App has been registered, no installation or token broker has been implemented, and no permissions have been tested. No AI API billing is authorized.
+**GOV-001A: offline implementation; integration not enabled.** A provider-neutral
+Implementation Agent broker, restricted operation interface and synthetic unit tests
+are implemented. No GitHub App is registered or installed by this change. Live App
+authentication, GitHub permission enforcement and the human merge gate are **NOT RUN**.
+No AI API billing is authorized. GOV-001 remains incomplete under ADR-0002 until live
+evidence and human decisions exist.
 
 ## Layout
 - [AGENTS.md](AGENTS.md) — development and security instructions.
 - [apps/implementer/README.md](apps/implementer/README.md) — Implementation Agent integration contract.
 - [apps/reviewer/README.md](apps/reviewer/README.md) — independent reviewer integration contract.
-- [packages/github-auth/README.md](packages/github-auth/README.md) — future shared authentication boundary.
+- [packages/github-auth/README.md](packages/github-auth/README.md) — trusted authentication boundary.
 - [docs/architecture/overview.md](docs/architecture/overview.md) — roles and lifecycle.
 - [docs/security/permissions.md](docs/security/permissions.md) — initial permission matrix and constraints.
 - [docs/decisions/0001-bootstrap.md](docs/decisions/0001-bootstrap.md) — design decision.
-- [tests/README.md](tests/README.md) — future validation plan.
+- [tests/README.md](tests/README.md) — offline results and live validation gaps.
+- [GOV-001A architecture](docs/architecture/implementer-boundary.md) — implementation decisions, custody, activation and rollback.
 
 ## Next steps
-1. Protect `master` and verify PR-only policy is effective (see [branch protection guide](docs/security/branch-protection.md)).
-2. Implement and test App installation/token brokering **only after separate explicit approval**.
-3. Verify distinct authenticated GitHub actors for Push/PR and review, plus human-only merge enforcement.
+1. Obtain independent technical review by Wit and explicit Human Gate Owner authorization.
+2. Keep the existing protected `master` ruleset; resolve the bootstrap author/approver identity gate through an approved human decision.
+3. Before any activation, separately authorize App registration/installation and live tests; complete the evidence record in the architecture document.
+
+Offline developer checks (Python 3.11+, no dependencies or credentials):
+
+```bash
+python3 -m unittest discover -s tests/unit -v
+```
 
 **Never store private keys, tokens, credentials, .env files or confidential production data in this public repository.**
