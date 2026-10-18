@@ -12,9 +12,14 @@ tests are **PASSED**; actual GitHub permission enforcement remains **NOT RUN**.
 | --- | --- | --- | --- |
 | Metadata | Read | Read | GitHub account |
 | Contents | Read/write (feature branches only via rules) | Read | Owner |
-| Pull requests | Read/write (draft/edit) | Read/write only when needed for review/comments | Final decision |
+| Pull requests | Read/write (draft/edit) | Read | Final decision |
+| Checks | None | Write (advisory SHA-bound result) | Owner |
 | Administration | None | None | Owner |
 | Workflows, Actions, Secrets | None | None | Owner |
+
+For GOV-003A the Reviewer proposal uses **Pull requests: read** and **Checks:
+write**, with no PR write. See [reviewer-permissions.md](reviewer-permissions.md).
+Neither App's scopes are registered or enforced live.
 
 GitHub App permission scopes are broader than fine-grained operations. **Contents write is not inherently feature-branch-only**, and PR write does not inherently prevent merging. Require verified base-branch rulesets, operation allowlists in broker, and negative permission tests. Never assume documented intent is GitHub enforcement.
 
