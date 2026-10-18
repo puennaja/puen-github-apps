@@ -1,0 +1,17 @@
+# Initial GitHub App permission proposal
+
+**Status: unverified; do not register/install yet without separate approval.**
+
+| Permission | Implementer | Reviewer | Human |
+| --- | --- | --- | --- |
+| Metadata | Read | Read | GitHub account |
+| Contents | Read/write (feature branches only via rules) | Read | Owner |
+| Pull requests | Read/write (draft/edit) | Read/write only when needed for review/comments | Final decision |
+| Administration | None | None | Owner |
+| Workflows, Actions, Secrets | None | None | Owner |
+
+GitHub App permission scopes are broader than fine-grained operations. **Contents write is not inherently feature-branch-only**, and PR write does not inherently prevent merging. Require verified base-branch rulesets, operation allowlists in broker, and negative permission tests. Never assume documented intent is GitHub enforcement.
+
+Prefer separate App installations or identities per role, selected repositories only, no long-lived agent credentials. Provider-neutral task metadata is not authentication.
+
+Acceptance evidence required: GitHub actor attribution for push/PR/review, denied prohibited operations, branch protection status, tested human-only merge gate, token expiry/revocation, and no secrets in logs.
